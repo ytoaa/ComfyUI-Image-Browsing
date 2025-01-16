@@ -5,10 +5,10 @@ version = "2.2.0"
 license = { file = "LICENSE" }
 
 [project.urls]
-Repository = "https://github.com/hayden-fr/ComfyUI-Image-Browsing"
+Repository = "https://github.com/ytoaa/ComfyUI-Image-Browsing"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "hayden"
+PublisherId = "ytoaa"
 DisplayName = "ComfyUI-Image-Browsing"
 Icon = ""
