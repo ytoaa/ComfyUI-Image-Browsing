@@ -5,8 +5,10 @@
     v-container="container"
     @contextmenu.prevent="nonContextMenu"
   >
-    <div :class="['mb-4 flex gap-4 px-4', $xl('flex-row', 'flex-col')]"><!-- Header -->
-      <div class="flex flex-1 gap-1 overflow-hidden"><!-- Navigation buttons -->
+    <div :class="['mb-4 flex gap-4 px-4', $xl('flex-row', 'flex-col')]">
+      <!-- Header -->
+      <div class="flex flex-1 gap-1 overflow-hidden">
+        <!-- Navigation buttons -->
         <Button
           class="shrink-0"
           icon="pi pi-arrow-up"
@@ -15,7 +17,7 @@
           severity="secondary"
           :disabled="breadcrumb.length < 2"
           @click="goBackParentFolder"
-        ></Button>
+        />
 
         <Button
           class="shrink-0"
@@ -24,7 +26,7 @@
           :rounded="true"
           severity="secondary"
           @click="refresh"
-        ></Button>
+        />
 
         <div
           :class="[
@@ -33,12 +35,13 @@
             'overflow-hidden *:select-none *:opacity-70',
           ]"
         >
-          <div class="flex h-full items-center"><!-- Breadcrumb -->
+          <div class="flex h-full items-center">
+            <!-- Breadcrumb -->
             <span class="flex h-full items-center justify-center px-2">
-              <i class="pi pi-desktop"></i>
+              <i class="pi pi-desktop" />
             </span>
             <span class="flex aspect-square h-full items-center justify-center">
-              <i class="pi pi-angle-right"></i>
+              <i class="pi pi-angle-right" />
             </span>
           </div>
           <div class="flex h-full items-center justify-end overflow-hidden">
@@ -68,7 +71,7 @@
                         'pi pi-angle-right transition-all',
                         overlayVisible ? '[transform:rotate(90deg)]' : '',
                       ]"
-                    ></i>
+                    />
                   </span>
                 </template>
               </ResponseSelect>
@@ -98,7 +101,7 @@
           v-model="searchContent"
           :placeholder="$t('searchInFolder', [currentFolderName])"
           :allow-clear="true"
-        ></ResponseInput>
+        />
       </div>
     </div>
 
@@ -143,12 +146,12 @@
                         d="M853.333333 256H469.333333l-85.333333-85.333333H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v170.666667h853.333334v-85.333334c0-46.933333-38.4-85.333333-85.333334-85.333333z"
                         fill="#FFA000"
                         p-id="5618"
-                      ></path>
+                      />
                       <path
                         d="M853.333333 256H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v426.666667c0 46.933333 38.4 85.333333 85.333334 85.333333h682.666666c46.933333 0 85.333333-38.4 85.333334-85.333333V341.333333c0-46.933333-38.4-85.333333-85.333334-85.333333z"
                         fill="#FFCA28"
                         p-id="5619"
-                      ></path>
+                      />
                     </svg>
                   </div>
                   <img
@@ -161,7 +164,7 @@
                     class="absolute left-0 top-0 h-full w-full"
                     draggable="true"
                     @dragend.stop="rowItem.onDragEnd"
-                  ></div>
+                  />
                 </div>
                 <div class="flex w-full justify-center overflow-hidden px-1">
                   <span class="overflow-hidden text-ellipsis text-xs">
@@ -170,12 +173,12 @@
                 </div>
               </div>
             </div>
-            <div class="col-span-full"></div>
+            <div class="col-span-full" />
           </div>
         </template>
 
         <template #empty>
-          <div></div>
+          <div />
         </template>
       </ResponseScroll>
 
@@ -184,7 +187,7 @@
         class="absolute left-0 top-0 h-full w-full bg-black/10"
       >
         <div class="flex h-full w-full flex-col items-center justify-center">
-          <div class="pi pi-spin pi-spinner"></div>
+          <div class="pi pi-spin pi-spinner" />
         </div>
       </div>
 
@@ -198,16 +201,16 @@
 
     <div class="flex select-none justify-between px-4 py-2 text-sm">
       <div class="flex gap-4">
-        <span>{{ items.flat().length }} {{ $t('items') }}</span>
+        <span>{{ items.flat().length }} {{ $t("items") }}</span>
         <span v-show="selectedItems.length > 0">
-          {{ $t('selected') }}
+          {{ $t("selected") }}
           {{ selectedItems.length }}
-          {{ $t('items') }}
+          {{ $t("items") }}
         </span>
       </div>
     </div>
 
-    <ContextMenu ref="menu" :model="contextItems"></ContextMenu>
+    <ContextMenu ref="menu" :model="contextItems" />
 
     <ConfirmDialog group="confirm-name">
       <template #container="{ acceptCallback: accept, rejectCallback: reject }">
@@ -218,10 +221,10 @@
             v-model="confirmName"
             v-focus
             @keyup.enter="accept"
-          ></InputText>
+          />
           <div class="mt-6 flex items-center gap-2">
-            <Button :label="$t('cancel')" @click="reject" outlined></Button>
-            <Button :label="$t('confirm')" @click="accept"></Button>
+            <Button :label="$t('cancel')" @click="reject" outlined />
+            <Button :label="$t('confirm')" @click="accept" />
           </div>
         </div>
       </template>
@@ -230,20 +233,20 @@
 </template>
 
 <script setup lang="ts">
-import ResponseInput from 'components/ResponseInput.vue';
-import ResponseScroll from 'components/ResponseScroll.vue';
-import ResponseSelect from 'components/ResponseSelect.vue';
-import { useContainerQueries } from 'hooks/container';
-import { useExplorer } from 'hooks/explorer';
-import { defineResizeCallback } from 'hooks/resize';
-import { chunk } from 'lodash';
-import Button from 'primevue/button';
-import ConfirmDialog from 'primevue/confirmdialog';
-import ContextMenu from 'primevue/contextmenu';
-import InputText from 'primevue/inputtext';
-import RadioButton from 'primevue/radiobutton';
-import Dropdown from 'primevue/dropdown';
-import { computed, ref } from 'vue';
+import ResponseInput from "components/ResponseInput.vue";
+import ResponseScroll from "components/ResponseScroll.vue";
+import ResponseSelect from "components/ResponseSelect.vue";
+import { useContainerQueries } from "hooks/container";
+import { useExplorer } from "hooks/explorer";
+import { defineResizeCallback } from "hooks/resize";
+import { chunk } from "lodash";
+import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
+import ContextMenu from "primevue/contextmenu";
+import InputText from "primevue/inputtext";
+import RadioButton from "primevue/radiobutton";
+import Dropdown from "primevue/dropdown";
+import { computed, ref } from "vue";
 
 const {
   loading,
@@ -259,54 +262,54 @@ const {
   goBackParentFolder,
   sortOrder,
   sortBy,
-} = useExplorer()
+} = useExplorer();
 
 const sortOptions = [
-  { label: 'Name', value: 'name' },
-  { label: 'Creation Date', value: 'createdAt' },
-]
+  { label: "Name", value: "name" },
+  { label: "Creation Date", value: "createdAt" },
+];
 
-const searchContent = ref('')
+const searchContent = ref("");
 
-const colSpan = ref(1)
+const colSpan = ref(1);
 
 const folderItems = computed(() => {
   const filterItems = items.value.filter((item) => {
-    return item.name.toLowerCase().includes(searchContent.value.toLowerCase())
-  })
+    return item.name.toLowerCase().includes(searchContent.value.toLowerCase());
+  });
 
-  return chunk(filterItems, colSpan.value)
-})
+  return chunk(filterItems, colSpan.value);
+});
 
 const onContainerResize = defineResizeCallback((entries) => {
-  const entry = entries[0]
+  const entry = entries[0];
 
-  const containerWidth = entry.contentRect.width
-  const itemWidth = 128
-  colSpan.value = Math.floor(containerWidth / itemWidth)
-})
+  const containerWidth = entry.contentRect.width;
+  const itemWidth = 128;
+  colSpan.value = Math.floor(containerWidth / itemWidth);
+});
 
 const currentFolderName = computed(() => {
-  return breadcrumb.value[breadcrumb.value.length - 1].name
-})
+  return breadcrumb.value[breadcrumb.value.length - 1].name;
+});
 
 const selectedItemsName = computed(() => {
-  return selectedItems.value.map((item) => item.name)
-})
+  return selectedItems.value.map((item) => item.name);
+});
 
 const nonContextMenu = ($event: MouseEvent) => {
-  menu.value.hide($event)
-}
+  menu.value.hide($event);
+};
 
 const clearSelected = () => {
-  selectedItems.value = []
-}
+  selectedItems.value = [];
+};
 
 const vFocus = {
   mounted: (el: HTMLInputElement) => el.focus(),
-}
+};
 
-const container = Symbol('container')
+const container = Symbol("container");
 
-const { $xl } = useContainerQueries(container)
+const { $xl } = useContainerQueries(container);
 </script>
