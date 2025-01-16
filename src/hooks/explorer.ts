@@ -1,23 +1,23 @@
-import { request } from 'hooks/request'
-import { defineStore } from 'hooks/store'
-import { useToast } from 'hooks/toast'
-import { MenuItem } from 'primevue/menuitem'
-import { app } from 'scripts/comfyAPI'
-import { DirectoryItem, SelectOptions } from 'types/typings'
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { request } from 'hooks/request';
+import { defineStore } from 'hooks/store';
+import { useToast } from 'hooks/toast';
+import { MenuItem } from 'primevue/menuitem';
+import { app } from 'scripts/comfyAPI';
+import { DirectoryItem, SelectOptions } from 'types/typings';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 interface DirectoryBreadcrumb extends DirectoryItem {
-  children: SelectOptions[]
+  children: SelectOptions[];
 }
 
 export const useExplorer = defineStore('explorer', (store) => {
-  const { toast, confirm } = useToast()
-  const { t } = useI18n()
+  const { toast, confirm } = useToast();
+  const { t } = useI18n();
 
-  const loading = ref(false)
-  const sortOrder = ref('asc')
-  const sortBy = ref('name')
+  const loading = ref(false);
+  const sortOrder = ref('asc');
+  const sortBy = ref('name');
 
   const rootDirectory: DirectoryBreadcrumb = {
     name: 'output',
@@ -27,106 +27,106 @@ export const useExplorer = defineStore('explorer', (store) => {
     createdAt: 0,
     updatedAt: 0,
     children: [],
-  }
+  };
 
-  const breadcrumb = ref<DirectoryBreadcrumb[]>([rootDirectory])
+  const breadcrumb = ref<DirectoryBreadcrumb[]>([rootDirectory]);
   const currentPath = computed(() => {
-    return breadcrumb.value[breadcrumb.value.length - 1].fullname
-  })
+    return breadcrumb.value[breadcrumb.value.length - 1].fullname;
+  });
 
-  const items = ref<DirectoryItem[]>([])
-  const menuRef = ref()
-  const contextItems = ref<MenuItem[]>([])
-  const selectedItems = ref<DirectoryItem[]>([])
-  const currentSelected = ref<DirectoryItem>()
+  const items = ref<DirectoryItem[]>([]);
+  const menuRef = ref();
+  const contextItems = ref<MenuItem[]>([]);
+  const selectedItems = ref<DirectoryItem[]>([]);
+  const currentSelected = ref<DirectoryItem>();
 
   const sortItems = (items: DirectoryItem[]) => {
     const sorted = [...items].sort((a, b) => {
       if (sortBy.value === 'name') {
-        return sortOrder.value === 'asc' 
-          ? a.name.localeCompare(b.name) 
-          : b.name.localeCompare(a.name)
+        return sortOrder.value === 'asc'
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
       } else {
         return sortOrder.value === 'asc'
           ? a.createdAt - b.createdAt
-          : b.createdAt - a.createdAt
+          : b.createdAt - a.createdAt;
       }
-    })
-    return sorted
-  }
+    });
+    return sorted;
+  };
 
   const entryFolder = async (item: DirectoryItem, breadcrumbIndex: number) => {
     if (breadcrumbIndex === breadcrumb.value.length - 1) {
-      const lastItem = breadcrumb.value[breadcrumbIndex]
+      const lastItem = breadcrumb.value[breadcrumbIndex];
       if (item.fullname === lastItem.fullname) {
-        return
+        return;
       }
     }
 
-    breadcrumb.value.splice(breadcrumbIndex)
-    breadcrumb.value.push({ ...item, children: [] })
-    await refresh()
-  }
+    breadcrumb.value.splice(breadcrumbIndex);
+    breadcrumb.value.push({ ...item, children: [] });
+    await refresh();
+  };
 
   const goBackParentFolder = async () => {
-    breadcrumb.value.pop()
-    await refresh()
-  }
+    breadcrumb.value.pop();
+    await refresh();
+  };
 
-  const confirmName = ref<string | undefined>(undefined)
+  const confirmName = ref<string | undefined>(undefined);
 
   const assertValidName = (name: string) => {
-    if (items.value.some((c) => c.name == name)) {
-      const message = 'Name was existed.'
+    if (items.value.some((c) => c.name === name)) {
+      const message = 'Name was existed.';
       toast.add({
         severity: 'warn',
         summary: 'Warning',
         detail: message,
         life: 2000,
-      })
-      throw new Error(message)
+      });
+      throw new Error(message);
     }
 
     if (name.endsWith(' ') || name.endsWith('.')) {
-      const message = 'Name cannot end with space or period.'
+      const message = 'Name cannot end with space or period.';
       toast.add({
         severity: 'warn',
         summary: 'Warning',
         detail: message,
         life: 2000,
-      })
-      throw new Error(message)
+      });
+      throw new Error(message);
     }
 
-    const windowsInvalidChars = /[<>:"/\\|?*]/
-    const linuxInvalidChars = /[/\0]/
+    const windowsInvalidChars = /[<>:"/\\|?*]/;
+    const linuxInvalidChars = /[/\0]/;
 
     if (windowsInvalidChars.test(name) || linuxInvalidChars.test(name)) {
-      const message = 'Name contains illegal characters: <>:"/\\|?*'
+      const message = 'Name contains illegal characters: <>:"/\\|?*';
       toast.add({
         severity: 'warn',
         summary: 'Warning',
         detail: message,
         life: 2000,
-      })
-      throw new Error(message)
+      });
+      throw new Error(message);
     }
 
-    const windowsReservedNames = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i
+    const windowsReservedNames = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
     if (windowsReservedNames.test(name.split('.')[0])) {
-      const message = 'Name cannot be reserved name.'
+      const message = 'Name cannot be reserved name.';
       toast.add({
         severity: 'warn',
         summary: 'Warning',
         detail: message,
         life: 2000,
-      })
-      throw new Error(message)
+      });
+      throw new Error(message);
     }
-  }
+  };
 
   const createItems = (formData: FormData) => {
-    loading.value = true
+    loading.value = true;
     request(currentPath.value, {
       method: 'POST',
       body: formData,
@@ -138,12 +138,12 @@ export const useExplorer = defineStore('explorer', (store) => {
           summary: 'Error',
           detail: err.message || 'Failed to upload files.',
           life: 5000,
-        })
+        });
       })
       .finally(() => {
-        loading.value = false
-      })
-  }
+        loading.value = false;
+      });
+  };
 
   const deleteItems = () => {
     const handleDelete = () => {
@@ -160,8 +160,8 @@ export const useExplorer = defineStore('explorer', (store) => {
             summary: 'Success',
             detail: 'Deleted successfully.',
             life: 2000,
-          })
-          return refresh()
+          });
+          return refresh();
         })
         .catch((err) => {
           toast.add({
@@ -169,9 +169,9 @@ export const useExplorer = defineStore('explorer', (store) => {
             summary: 'Error',
             detail: err.message || 'Failed to load folder list.',
             life: 15000,
-          })
-        })
-    }
+          });
+        });
+    };
 
     if (store.config.showDeleteConfirm.value) {
       confirm.require({
@@ -189,27 +189,26 @@ export const useExplorer = defineStore('explorer', (store) => {
         },
         accept: handleDelete,
         reject: () => {},
-      })
+      });
     } else {
-      handleDelete()
+      handleDelete();
     }
-  }
+  };
 
   const renameItem = (item: DirectoryItem) => {
-    confirmName.value = item.name
+    confirmName.value = item.name;
 
     confirm.require({
       group: 'confirm-name',
       accept: () => {
-        const name = confirmName.value?.trim() ?? ''
-        const filename = `${currentPath.value}/${name}`
+        const name = confirmName.value?.trim() ?? '';
+        const filename = `${currentPath.value}/${name}`;
 
-        // If name is empty or same as current name, do nothing
         if (name === '' || name === item.name) {
-          return
+          return;
         }
 
-        assertValidName(name)
+        assertValidName(name);
 
         request(item.fullname, {
           method: 'PUT',
@@ -218,8 +217,8 @@ export const useExplorer = defineStore('explorer', (store) => {
           }),
         })
           .then(() => {
-            item.name = name
-            item.fullname = filename
+            item.name = name;
+            item.fullname = filename;
           })
           .catch((err) => {
             toast.add({
@@ -227,12 +226,12 @@ export const useExplorer = defineStore('explorer', (store) => {
               summary: 'Error',
               detail: err.message || 'Failed to load folder list.',
               life: 5000,
-            })
-          })
+            });
+          });
       },
-    })
-  }
-
+    });
+  };
+  
   const bindEvents = (item: DirectoryItem, index: number) => {
     item.onClick = ($event) => {
       menuRef.value.hide($event)

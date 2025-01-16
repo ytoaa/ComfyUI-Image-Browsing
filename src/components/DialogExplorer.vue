@@ -5,8 +5,8 @@
     v-container="container"
     @contextmenu.prevent="nonContextMenu"
   >
-    <div :class="['mb-4 flex gap-4 px-4', $xl('flex-row', 'flex-col')]">
-      <div class="flex flex-1 gap-1 overflow-hidden">
+    <div :class="['mb-4 flex gap-4 px-4', $xl('flex-row', 'flex-col')]"><!-- Header -->
+      <div class="flex flex-1 gap-1 overflow-hidden"><!-- Navigation buttons -->
         <Button
           class="shrink-0"
           icon="pi pi-arrow-up"
@@ -33,7 +33,7 @@
             'overflow-hidden *:select-none *:opacity-70',
           ]"
         >
-          <div class="flex h-full items-center">
+          <div class="flex h-full items-center"><!-- Breadcrumb -->
             <span class="flex h-full items-center justify-center px-2">
               <i class="pi pi-desktop"></i>
             </span>
@@ -230,20 +230,20 @@
 </template>
 
 <script setup lang="ts">
-import ResponseInput from 'components/ResponseInput.vue'
-import ResponseScroll from 'components/ResponseScroll.vue'
-import ResponseSelect from 'components/ResponseSelect.vue'
-import { useContainerQueries } from 'hooks/container'
-import { useExplorer } from 'hooks/explorer'
-import { defineResizeCallback } from 'hooks/resize'
-import { chunk } from 'lodash'
-import Button from 'primevue/button'
-import ConfirmDialog from 'primevue/confirmdialog'
-import ContextMenu from 'primevue/contextmenu'
-import InputText from 'primevue/inputtext'
-import RadioButton from 'primevue/radiobutton'
-import Dropdown from 'primevue/dropdown'
-import { computed, ref } from 'vue'
+import ResponseInput from 'components/ResponseInput.vue';
+import ResponseScroll from 'components/ResponseScroll.vue';
+import ResponseSelect from 'components/ResponseSelect.vue';
+import { useContainerQueries } from 'hooks/container';
+import { useExplorer } from 'hooks/explorer';
+import { defineResizeCallback } from 'hooks/resize';
+import { chunk } from 'lodash';
+import Button from 'primevue/button';
+import ConfirmDialog from 'primevue/confirmdialog';
+import ContextMenu from 'primevue/contextmenu';
+import InputText from 'primevue/inputtext';
+import RadioButton from 'primevue/radiobutton';
+import Dropdown from 'primevue/dropdown';
+import { computed, ref } from 'vue';
 
 const {
   loading,
