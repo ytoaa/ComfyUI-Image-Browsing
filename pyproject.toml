@@ -12,3 +12,5 @@ Repository = "https://github.com/ytoaa/ComfyUI-Image-Browsing"
 PublisherId = "ytoaa"
 DisplayName = "ComfyUI-Image-Browsing"
 Icon = ""
+
+#only fork project
