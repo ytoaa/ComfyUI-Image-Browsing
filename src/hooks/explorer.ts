@@ -38,10 +38,6 @@ export const useExplorer = defineStore('explorer', (store) => {
   const selectedItems = ref<DirectoryItem[]>([])
   const currentSelected = ref<DirectoryItem>()
 
-  // Sorting options
-  const sortBy = ref<'name' | 'createdAt'>('name')
-  const sortOrder = ref<'ascending' | 'descending'>('ascending')
-
   const entryFolder = async (item: DirectoryItem, breadcrumbIndex: number) => {
     if (breadcrumbIndex === breadcrumb.value.length - 1) {
       const lastItem = breadcrumb.value[breadcrumbIndex]
@@ -443,32 +439,8 @@ export const useExplorer = defineStore('explorer', (store) => {
             images.push(item)
           }
         }
-
-        // Sorting based on user preference
-        if (sortBy.value === 'name') {
-          folders.sort((a, b) =>
-            sortOrder.value === 'ascending'
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name)
-          )
-          images.sort((a, b) =>
-            sortOrder.value === 'ascending'
-              ? a.name.localeCompare(b.name)
-              : b.name.localeCompare(a.name)
-          )
-        } else if (sortBy.value === 'createdAt') {
-          folders.sort((a, b) =>
-            sortOrder.value === 'ascending'
-              ? a.createdAt - b.createdAt
-              : b.createdAt - a.createdAt
-          )
-          images.sort((a, b) =>
-            sortOrder.value === 'ascending'
-              ? a.createdAt - b.createdAt
-              : b.createdAt - a.createdAt
-          )
-        }
-
+        folders.sort((a, b) => a.name.localeCompare(b.name))
+        images.sort((a, b) => a.name.localeCompare(b.name))
         items.value = [...folders, ...images]
         items.value.forEach(bindEvents)
         breadcrumb.value[breadcrumb.value.length - 1].children = folders.map(
@@ -481,7 +453,7 @@ export const useExplorer = defineStore('explorer', (store) => {
                 entryFolder(item, folderLevel)
               },
             }
-          }
+          },
         )
       })
       .catch((err) => {
@@ -517,8 +489,6 @@ export const useExplorer = defineStore('explorer', (store) => {
     folderContext: folderContext,
     goBackParentFolder: goBackParentFolder,
     clearStatus: clearStatus,
-    sortBy: sortBy,
-    sortOrder: sortOrder,
   }
 })
 
