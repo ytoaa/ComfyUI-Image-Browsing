@@ -26,54 +26,22 @@
           @click="refresh"
         ></Button>
 
-        <div
-          :class="[
-            'flex h-10 flex-1 basis-10 items-center rounded-lg px-2 py-1',
-            'bg-gray-100 dark:bg-gray-900',
-            'overflow-hidden *:select-none *:opacity-70',
-          ]"
-        >
-          <div class="flex h-full items-center">
-            <span class="flex h-full items-center justify-center px-2">
-              <i class="pi pi-desktop"></i>
-            </span>
-            <span class="flex aspect-square h-full items-center justify-center">
-              <i class="pi pi-angle-right"></i>
-            </span>
-          </div>
-          <div class="flex h-full items-center justify-end overflow-hidden">
-            <div
-              v-for="(item, index) in breadcrumb"
-              :key="item.fullname"
-              class="flex h-full items-center rounded border border-solid border-transparent hover:border-gray-400 dark:hover:border-gray-700"
-            >
-              <span
-                class="flex h-full items-center whitespace-nowrap px-2 hover:bg-gray-400 dark:hover:bg-gray-700"
-                @click="entryFolder(item, index)"
-              >
-                {{ item.name }}
-              </span>
-              <ResponseSelect
-                v-if="item.children.length > 0"
-                :model-value="item.fullname"
-                :items="item.children"
-              >
-                <template #target="{ toggle, overlayVisible }">
-                  <span
-                    class="flex aspect-square h-full items-center justify-center hover:bg-gray-400 dark:hover:bg-gray-700"
-                    @click="toggle"
-                  >
-                    <i
-                      :class="[
-                        'pi pi-angle-right transition-all',
-                        overlayVisible ? '[transform:rotate(90deg)]' : '',
-                      ]"
-                    ></i>
-                  </span>
-                </template>
-              </ResponseSelect>
-            </div>
-          </div>
+        <!-- 오름차순/내림차순 라디오 버튼 -->
+        <div class="flex items-center">
+          <span class="mr-2">Sort Order:</span>
+          <input type="radio" id="ascending" value="ascending" v-model="sortOrder" />
+          <label for="ascending">Ascending</label>
+          <input type="radio" id="descending" value="descending" v-model="sortOrder" />
+          <label for="descending">Descending</label>
+        </div>
+
+        <!-- 이름순/생성순 콤보 박스 -->
+        <div class="flex items-center">
+          <span class="mr-2">Sort By:</span>
+          <select v-model="sortBy" class="p-inputtext p-component">
+            <option value="name">Name</option>
+            <option value="creationDate">Creation Date</option>
+          </select>
         </div>
       </div>
 
@@ -98,12 +66,12 @@
               class="h-32 w-32 px-1 pb-1"
             >
               <div
-                :class="[
+                :class="[ 
                   'flex h-full w-full flex-col items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-lg',
                   'hover:bg-gray-300 dark:hover:bg-gray-800',
                   selectedItemsName.includes(rowItem.name)
                     ? 'bg-gray-300 dark:bg-gray-800'
-                    : '',
+                    : ''
                 ]"
                 @click.stop="rowItem.onClick"
                 @dblclick.stop="rowItem.onDbClick"
@@ -244,12 +212,29 @@ const searchContent = ref('')
 const colSpan = ref(1)
 
 const folderItems = computed(() => {
-  const filterItems = items.value.filter((item) => {
+  let sortedItems = [...items.value]
+
+  // 정렬 기준 처리
+  if (sortBy === 'name') {
+    sortedItems = sortedItems.sort((a, b) => a.name.localeCompare(b.name))
+  } else if (sortBy === 'creationDate') {
+    sortedItems = sortedItems.sort((a, b) => a.creationDate - b.creationDate)
+  }
+
+  // 오름차순/내림차순 처리
+  if (sortOrder === 'descending') {
+    sortedItems = sortedItems.reverse()
+  }
+
+  const filterItems = sortedItems.filter((item) => {
     return item.name.toLowerCase().includes(searchContent.value.toLowerCase())
   })
 
   return chunk(filterItems, colSpan.value)
 })
+
+const sortOrder = ref('ascending') // 오름차순 기본값
+const sortBy = ref('name') // 이름순 기본값
 
 const onContainerResize = defineResizeCallback((entries) => {
   const entry = entries[0]
