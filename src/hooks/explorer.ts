@@ -1,154 +1,154 @@
-import { request } from "hooks/request";
-import { defineStore } from "hooks/store";
-import { useToast } from "hooks/toast";
-import { MenuItem } from "primevue/menuitem";
-import { app } from "scripts/comfyAPI";
-import { DirectoryItem, SelectOptions } from "types/typings";
-import { computed, ref } from "vue";
-import { useI18n } from "vue-i18n";
+import { request } from 'hooks/request'
+import { defineStore } from 'hooks/store'
+import { useToast } from 'hooks/toast'
+import { MenuItem } from 'primevue/menuitem'
+import { app } from 'scripts/comfyAPI'
+import { DirectoryItem, SelectOptions } from 'types/typings'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface DirectoryBreadcrumb extends DirectoryItem {
-  children: SelectOptions[];
+  children: SelectOptions[]
 }
 
-export const useExplorer = defineStore("explorer", (store) => {
-  const { toast, confirm } = useToast();
-  const { t } = useI18n();
+export const useExplorer = defineStore('explorer', (store) => {
+  const { toast, confirm } = useToast()
+  const { t } = useI18n()
 
-  const loading = ref(false);
-  const sortOrder = ref("asc");
-  const sortBy = ref("name");
+  const loading = ref(false)
+  const sortOrder = ref('asc')
+  const sortBy = ref('name')
 
   const rootDirectory: DirectoryBreadcrumb = {
-    name: "output",
-    type: "folder",
+    name: 'output',
+    type: 'folder',
     size: 0,
-    fullname: "/output",
+    fullname: '/output',
     createdAt: 0,
     updatedAt: 0,
     children: [],
-  };
+  }
 
-  const breadcrumb = ref<DirectoryBreadcrumb[]>([rootDirectory]);
+  const breadcrumb = ref<DirectoryBreadcrumb[]>([rootDirectory])
   const currentPath = computed(() => {
-    return breadcrumb.value[breadcrumb.value.length - 1].fullname;
-  });
+    return breadcrumb.value[breadcrumb.value.length - 1].fullname
+  })
 
-  const items = ref<DirectoryItem[]>([]);
-  const menuRef = ref();
-  const contextItems = ref<MenuItem[]>([]);
-  const selectedItems = ref<DirectoryItem[]>([]);
-  const currentSelected = ref<DirectoryItem>();
+  const items = ref<DirectoryItem[]>([])
+  const menuRef = ref()
+  const contextItems = ref<MenuItem[]>([])
+  const selectedItems = ref<DirectoryItem[]>([])
+  const currentSelected = ref<DirectoryItem>()
 
   const sortItems = (items: DirectoryItem[]) => {
     const sorted = [...items].sort((a, b) => {
-      if (sortBy.value === "name") {
-        return sortOrder.value === "asc"
+      if (sortBy.value === 'name') {
+        return sortOrder.value === 'asc'
           ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+          : b.name.localeCompare(a.name)
       } else {
-        return sortOrder.value === "asc"
+        return sortOrder.value === 'asc'
           ? a.createdAt - b.createdAt
-          : b.createdAt - a.createdAt;
+          : b.createdAt - a.createdAt
       }
-    });
-    return sorted;
-  };
+    })
+    return sorted
+  }
 
   const entryFolder = async (item: DirectoryItem, breadcrumbIndex: number) => {
     if (breadcrumbIndex === breadcrumb.value.length - 1) {
-      const lastItem = breadcrumb.value[breadcrumbIndex];
+      const lastItem = breadcrumb.value[breadcrumbIndex]
       if (item.fullname === lastItem.fullname) {
-        return;
+        return
       }
     }
 
-    breadcrumb.value.splice(breadcrumbIndex);
-    breadcrumb.value.push({ ...item, children: [] });
-    await refresh();
-  };
+    breadcrumb.value.splice(breadcrumbIndex)
+    breadcrumb.value.push({ ...item, children: [] })
+    await refresh()
+  }
 
   const goBackParentFolder = async () => {
-    breadcrumb.value.pop();
-    await refresh();
-  };
+    breadcrumb.value.pop()
+    await refresh()
+  }
 
-  const confirmName = ref<string | undefined>(undefined);
+  const confirmName = ref<string | undefined>(undefined)
 
   const assertValidName = (name: string) => {
     if (items.value.some((c) => c.name === name)) {
-      const message = "Name was existed.";
+      const message = 'Name was existed.'
       toast.add({
-        severity: "warn",
-        summary: "Warning",
+        severity: 'warn',
+        summary: 'Warning',
         detail: message,
         life: 2000,
-      });
-      throw new Error(message);
+      })
+      throw new Error(message)
     }
 
-    if (name.endsWith(" ") || name.endsWith(".")) {
-      const message = "Name cannot end with space or period.";
+    if (name.endsWith(' ') || name.endsWith('.')) {
+      const message = 'Name cannot end with space or period.'
       toast.add({
-        severity: "warn",
-        summary: "Warning",
+        severity: 'warn',
+        summary: 'Warning',
         detail: message,
         life: 2000,
-      });
-      throw new Error(message);
+      })
+      throw new Error(message)
     }
 
-    const windowsInvalidChars = /[<>:"/\\|?*]/;
-    const linuxInvalidChars = /[/\0]/;
+    const windowsInvalidChars = /[<>:"/\\|?*]/
+    const linuxInvalidChars = /[/\0]/
 
     if (windowsInvalidChars.test(name) || linuxInvalidChars.test(name)) {
-      const message = "Name contains illegal characters: <>:\"/\\|?*";
+      const message = 'Name contains illegal characters: <>:"/\\|?*'
       toast.add({
-        severity: "warn",
-        summary: "Warning",
+        severity: 'warn',
+        summary: 'Warning',
         detail: message,
         life: 2000,
-      });
-      throw new Error(message);
+      })
+      throw new Error(message)
     }
 
-    const windowsReservedNames = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
-    if (windowsReservedNames.test(name.split(".")[0])) {
-      const message = "Name cannot be reserved name.";
+    const windowsReservedNames = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i
+    if (windowsReservedNames.test(name.split('.')[0])) {
+      const message = 'Name cannot be reserved name.'
       toast.add({
-        severity: "warn",
-        summary: "Warning",
+        severity: 'warn',
+        summary: 'Warning',
         detail: message,
         life: 2000,
-      });
-      throw new Error(message);
+      })
+      throw new Error(message)
     }
-  };
+  }
 
   const createItems = (formData: FormData) => {
-    loading.value = true;
+    loading.value = true
     request(currentPath.value, {
-      method: "POST",
+      method: 'POST',
       body: formData,
     })
       .then(() => refresh())
       .catch((err) => {
         toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: err.message || "Failed to upload files.",
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to upload files.',
           life: 5000,
-        });
+        })
       })
       .finally(() => {
-        loading.value = false;
-      });
-  };
+        loading.value = false
+      })
+  }
 
   const deleteItems = () => {
     const handleDelete = () => {
       request(`/delete`, {
-        method: "DELETE",
+        method: 'DELETE',
         body: JSON.stringify({
           uri: currentPath.value,
           file_list: selectedItems.value.map((c) => c.fullname),
@@ -156,342 +156,342 @@ export const useExplorer = defineStore("explorer", (store) => {
       })
         .then(() => {
           toast.add({
-            severity: "success",
-            summary: "Success",
-            detail: "Deleted successfully.",
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Deleted successfully.',
             life: 2000,
-          });
-          return refresh();
+          })
+          return refresh()
         })
         .catch((err) => {
           toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.message || "Failed to load folder list.",
+            severity: 'error',
+            summary: 'Error',
+            detail: err.message || 'Failed to load folder list.',
             life: 15000,
-          });
-        });
-    };
+          })
+        })
+    }
 
     if (store.config.showDeleteConfirm.value) {
       confirm.require({
-        message: t("deleteAsk", [t("selectedItems").toLowerCase()]),
-        header: "Danger",
-        icon: "pi pi-info-circle",
+        message: t('deleteAsk', [t('selectedItems').toLowerCase()]),
+        header: 'Danger',
+        icon: 'pi pi-info-circle',
         rejectProps: {
-          label: t("cancel"),
-          severity: "secondary",
+          label: t('cancel'),
+          severity: 'secondary',
           outlined: true,
         },
         acceptProps: {
-          label: t("delete"),
-          severity: "danger",
+          label: t('delete'),
+          severity: 'danger',
         },
         accept: handleDelete,
         reject: () => {},
-      });
+      })
     } else {
-      handleDelete();
+      handleDelete()
     }
-  };
+  }
 
   const renameItem = (item: DirectoryItem) => {
-    confirmName.value = item.name;
+    confirmName.value = item.name
 
     confirm.require({
-      group: "confirm-name",
+      group: 'confirm-name',
       accept: () => {
-        const name = confirmName.value?.trim() ?? "";
-        const filename = `${currentPath.value}/${name}`;
+        const name = confirmName.value?.trim() ?? ''
+        const filename = `${currentPath.value}/${name}`
 
-        if (name === "" || name === item.name) {
-          return;
+        if (name === '' || name === item.name) {
+          return
         }
 
-        assertValidName(name);
+        assertValidName(name)
 
         request(item.fullname, {
-          method: "PUT",
+          method: 'PUT',
           body: JSON.stringify({
             filename: filename,
           }),
         })
           .then(() => {
-            item.name = name;
-            item.fullname = filename;
+            item.name = name
+            item.fullname = filename
           })
           .catch((err) => {
             toast.add({
-              severity: "error",
-              summary: "Error",
-              detail: err.message || "Failed to load folder list.",
+              severity: 'error',
+              summary: 'Error',
+              detail: err.message || 'Failed to load folder list.',
               life: 5000,
-            });
-          });
+            })
+          })
       },
-    });
-  };
+    })
+  }
 
   const bindEvents = (item: DirectoryItem, index: number) => {
     item.onClick = ($event) => {
-      menuRef.value.hide($event);
+      menuRef.value.hide($event)
 
-      const isSelected = selectedItems.value.some((c) => c.name === item.name);
+      const isSelected = selectedItems.value.some((c) => c.name === item.name)
 
       if ($event.shiftKey) {
         const startIndex = Math.max(
           items.value.findIndex((c) => c.name === currentSelected.value?.name),
-          0
-        );
-        const endIndex = index;
+          0,
+        )
+        const endIndex = index
         const rangeItems = items.value.slice(
           Math.min(startIndex, endIndex),
-          Math.max(startIndex, endIndex) + 1
-        );
-        selectedItems.value = rangeItems;
-        return;
+          Math.max(startIndex, endIndex) + 1,
+        )
+        selectedItems.value = rangeItems
+        return
       }
 
-      currentSelected.value = item;
+      currentSelected.value = item
 
       if ($event.ctrlKey) {
         selectedItems.value = isSelected
           ? selectedItems.value.filter((c) => c.name !== item.name)
-          : [...selectedItems.value, item];
+          : [...selectedItems.value, item]
       } else {
-        selectedItems.value = [item];
+        selectedItems.value = [item]
       }
-    };
+    }
 
     item.onDbClick = () => {
-      if (item.type === "folder") {
-        entryFolder(item, breadcrumb.value.length);
+      if (item.type === 'folder') {
+        entryFolder(item, breadcrumb.value.length)
       } else {
-        store.preview.open(item);
+        store.preview.open(item)
       }
-    };
+    }
 
     item.onContextMenu = ($event) => {
-      const isSelected = selectedItems.value.some((c) => c.name === item.name);
+      const isSelected = selectedItems.value.some((c) => c.name === item.name)
 
       if (!isSelected) {
-        selectedItems.value = [item];
-        currentSelected.value = item;
+        selectedItems.value = [item]
+        currentSelected.value = item
       }
 
-      const contextMenu: MenuItem[] = [];
+      const contextMenu: MenuItem[] = []
 
-      if (item.type === "folder") {
+      if (item.type === 'folder') {
         contextMenu.push({
-          label: t("open"),
-          icon: "pi pi-folder",
+          label: t('open'),
+          icon: 'pi pi-folder',
           command: () => {
-            item.onDbClick?.($event);
+            item.onDbClick?.($event)
           },
-        });
+        })
       } else {
         contextMenu.push(
           {
-            label: t("open"),
-            icon: "pi pi-image",
+            label: t('open'),
+            icon: 'pi pi-image',
             command: () => {
-              item.onDbClick?.($event);
+              item.onDbClick?.($event)
             },
           },
           {
-            label: t("openInNewTab"),
-            icon: "pi pi-external-link",
+            label: t('openInNewTab'),
+            icon: 'pi pi-external-link',
             command: () => {
-              window.open(`/image-browsing${item.fullname}`, "_blank");
+              window.open(`/image-browsing${item.fullname}`, '_blank')
             },
           },
           {
-            label: t("save"),
-            icon: "pi pi-save",
+            label: t('save'),
+            icon: 'pi pi-save',
             command: () => {
-              const link = document.createElement("a");
-              link.href = `/image-browsing${item.fullname}`;
-              link.download = item.name;
-              link.click();
+              const link = document.createElement('a')
+              link.href = `/image-browsing${item.fullname}`
+              link.download = item.name
+              link.click()
             },
-          }
-        );
+          },
+        )
       }
 
       contextMenu.push({
-        label: t("rename"),
-        icon: "pi pi-file-edit",
+        label: t('rename'),
+        icon: 'pi pi-file-edit',
         command: () => {
-          renameItem(item);
+          renameItem(item)
         },
-      });
+      })
 
       contextMenu.push({
-        label: t("delete"),
-        icon: "pi pi-trash",
+        label: t('delete'),
+        icon: 'pi pi-trash',
         command: deleteItems,
-      });
+      })
 
-      if (selectedItems.value.length > 1 || item.type === "folder") {
+      if (selectedItems.value.length > 1 || item.type === 'folder') {
         contextMenu.push({
-          label: t("download"),
-          icon: "pi pi-download",
+          label: t('download'),
+          icon: 'pi pi-download',
           command: () => {
-            loading.value = true;
-            request("/archive", {
-              method: "POST",
+            loading.value = true
+            request('/archive', {
+              method: 'POST',
               body: JSON.stringify({
                 uri: currentPath.value,
                 file_list: selectedItems.value.map((c) => c.fullname),
               }),
             })
               .then((tmp_name) => {
-                const link = document.createElement("a");
-                link.href = `/image-browsing/archive/${tmp_name}`;
-                link.download = tmp_name;
-                link.click();
+                const link = document.createElement('a')
+                link.href = `/image-browsing/archive/${tmp_name}`
+                link.download = tmp_name
+                link.click()
               })
               .catch((err) => {
                 toast.add({
-                  severity: "error",
-                  summary: "Error",
-                  detail: err.message || "Failed to download.",
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: err.message || 'Failed to download.',
                   life: 15000,
-                });
+                })
               })
               .finally(() => {
-                loading.value = false;
-              });
+                loading.value = false
+              })
           },
-        });
+        })
       }
 
-      contextItems.value = contextMenu;
-      menuRef.value.show($event);
-    };
+      contextItems.value = contextMenu
+      menuRef.value.show($event)
+    }
 
     item.onDragEnd = ($event) => {
-      const target = document.elementFromPoint($event.clientX, $event.clientY);
+      const target = document.elementFromPoint($event.clientX, $event.clientY)
 
       if (
-        target?.tagName.toLocaleLowerCase() === "canvas" &&
-        target.id === "graph-canvas"
+        target?.tagName.toLocaleLowerCase() === 'canvas' &&
+        target.id === 'graph-canvas'
       ) {
-        const imageSource = `/image-browsing${item.fullname}`;
+        const imageSource = `/image-browsing${item.fullname}`
         fetch(imageSource)
           .then((response) => response.blob())
           .then((data) => {
-            const type = data.type;
-            const file = new File([data], item.name, { type });
-            app.handleFile(file);
-          });
+            const type = data.type
+            const file = new File([data], item.name, { type })
+            app.handleFile(file)
+          })
       }
-    };
-  };
+    }
+  }
 
   const folderContext = ($event: MouseEvent) => {
-    selectedItems.value = [];
+    selectedItems.value = []
     const contextMenu: MenuItem[] = [
       {
-        label: t("addFolder"),
-        icon: "pi pi-folder-plus",
+        label: t('addFolder'),
+        icon: 'pi pi-folder-plus',
         command: () => {
-          confirmName.value = t("newFolderName");
+          confirmName.value = t('newFolderName')
 
           confirm.require({
-            group: "confirm-name",
+            group: 'confirm-name',
             accept: () => {
-              const name = confirmName.value ?? "";
-              assertValidName(name);
-              const formData = new FormData();
-              formData.append("folders", name);
-              createItems(formData);
+              const name = confirmName.value ?? ''
+              assertValidName(name)
+              const formData = new FormData()
+              formData.append('folders', name)
+              createItems(formData)
             },
-          });
+          })
         },
       },
       {
-        label: t("uploadFile"),
-        icon: "pi pi-upload",
+        label: t('uploadFile'),
+        icon: 'pi pi-upload',
         command: () => {
-          const fileInput = document.createElement("input");
-          fileInput.type = "file";
-          fileInput.multiple = true;
-          fileInput.accept = "image/*";
+          const fileInput = document.createElement('input')
+          fileInput.type = 'file'
+          fileInput.multiple = true
+          fileInput.accept = 'image/*'
           fileInput.onchange = (e) => {
-            const files = (e.target as HTMLInputElement).files;
+            const files = (e.target as HTMLInputElement).files
             if (!files) {
-              return;
+              return
             }
-            const formData = new FormData();
+            const formData = new FormData()
             for (let i = 0; i < files.length; i++) {
-              formData.append("files", files[i]);
+              formData.append('files', files[i])
             }
-            createItems(formData);
-          };
-          fileInput.click();
+            createItems(formData)
+          }
+          fileInput.click()
         },
       },
-    ];
+    ]
 
-    contextItems.value = contextMenu;
-    menuRef.value.show($event);
-  };
+    contextItems.value = contextMenu
+    menuRef.value.show($event)
+  }
 
   const refresh = async () => {
-    loading.value = true;
-    items.value = [];
-    selectedItems.value = [];
-    currentSelected.value = undefined;
+    loading.value = true
+    items.value = []
+    selectedItems.value = []
+    currentSelected.value = undefined
     return request(currentPath.value)
       .then((resData) => {
-        const folders: DirectoryItem[] = [];
-        const images: DirectoryItem[] = [];
+        const folders: DirectoryItem[] = []
+        const images: DirectoryItem[] = []
         for (const item of resData) {
-          item.fullname = `${currentPath.value}/${item.name}`;
-          if (item.type === "folder") {
-            folders.push(item);
+          item.fullname = `${currentPath.value}/${item.name}`
+          if (item.type === 'folder') {
+            folders.push(item)
           } else {
-            images.push(item);
+            images.push(item)
           }
         }
 
         // Apply sorting to both folders and images
-        const sortedFolders = sortItems(folders);
-        const sortedImages = sortItems(images);
+        const sortedFolders = sortItems(folders)
+        const sortedImages = sortItems(images)
 
-        items.value = [...sortedFolders, ...sortedImages];
-        items.value.forEach(bindEvents);
+        items.value = [...sortedFolders, ...sortedImages]
+        items.value.forEach(bindEvents)
 
         breadcrumb.value[breadcrumb.value.length - 1].children =
           sortedFolders.map((item) => {
-            const folderLevel = breadcrumb.value.length;
+            const folderLevel = breadcrumb.value.length
             return {
               label: item.name,
               value: item.fullname,
               command: () => {
-                entryFolder(item, folderLevel);
+                entryFolder(item, folderLevel)
               },
-            };
-          });
+            }
+          })
       })
       .catch((err) => {
         toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: err.message || "Failed to load folder list.",
+          severity: 'error',
+          summary: 'Error',
+          detail: err.message || 'Failed to load folder list.',
           life: 15000,
-        });
+        })
       })
       .finally(() => {
-        loading.value = false;
-      });
-  };
+        loading.value = false
+      })
+  }
 
   const clearStatus = () => {
-    selectedItems.value = [];
-    currentSelected.value = undefined;
-  };
+    selectedItems.value = []
+    currentSelected.value = undefined
+  }
 
   return {
     loading,
@@ -510,11 +510,11 @@ export const useExplorer = defineStore("explorer", (store) => {
     folderContext,
     goBackParentFolder,
     clearStatus,
-  };
-});
+  }
+})
 
-declare module "hooks/store" {
+declare module 'hooks/store' {
   interface StoreProvider {
-    explorer: ReturnType<typeof useExplorer>;
+    explorer: ReturnType<typeof useExplorer>
   }
 }
