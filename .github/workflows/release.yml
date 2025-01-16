@@ -73,34 +73,3 @@ jobs:
           tag_name: v${{ steps.current_version.outputs.version }}
           draft: true
           make_latest: true
-
-      - name: Prepare publish custom node to registry
-        run: |
-          find . -maxdepth 1 ! -name '.' ! -name 'dist.tar.gz' ! -name '.git' -exec rm -rf {} +
-          tar -xzf dist.tar.gz
-          rm -rf dist.tar.gz
-
-      # - name: Publish Custom Node
-      #   uses: Comfy-Org/publish-node-action@main
-      #   with:
-      #     ## Add your own personal access token to your Github Repository secrets and reference it here.
-      #     personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
-      #
-      # Publish Custom Node
-      # Copy from Comfy-Org/publish-node-action@main
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install comfy-cli
-        shell: bash
-        run: |
-          pip install comfy-cli
-
-      - name: Publish Node
-        shell: bash
-        run: |
-          comfy --skip-prompt --no-enable-telemetry env
-          comfy node publish --token ${{ secrets.REGISTRY_ACCESS_TOKEN }}
