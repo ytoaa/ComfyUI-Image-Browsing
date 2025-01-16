@@ -439,8 +439,9 @@ export const useExplorer = defineStore('explorer', (store) => {
             images.push(item)
           }
         }
-        folders.sort((a, b) => a.name.localeCompare(b.name))
-        images.sort((a, b) => a.name.localeCompare(b.name))
+        // 이름 정렬 대신 생성일 내림차순 정렬
+        folders.sort((a, b) => b.createdAt - a.createdAt);
+        images.sort((a, b) => b.createdAt - a.createdAt);
         items.value = [...folders, ...images]
         items.value.forEach(bindEvents)
         breadcrumb.value[breadcrumb.value.length - 1].children = folders.map(
