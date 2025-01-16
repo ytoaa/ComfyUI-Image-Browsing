@@ -77,11 +77,29 @@
         </div>
       </div>
 
-      <ResponseInput
-        v-model="searchContent"
-        :placeholder="$t('searchInFolder', [currentFolderName])"
-        :allow-clear="true"
-      ></ResponseInput>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <RadioButton v-model="sortOrder" value="asc" inputId="sort-asc" />
+          <label for="sort-asc">Ascending</label>
+          <RadioButton v-model="sortOrder" value="desc" inputId="sort-desc" />
+          <label for="sort-desc">Descending</label>
+        </div>
+
+        <Dropdown
+          v-model="sortBy"
+          :options="sortOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Sort by"
+          class="w-32"
+        />
+
+        <ResponseInput
+          v-model="searchContent"
+          :placeholder="$t('searchInFolder', [currentFolderName])"
+          :allow-clear="true"
+        ></ResponseInput>
+      </div>
     </div>
 
     <div
@@ -223,6 +241,8 @@ import Button from 'primevue/button'
 import ConfirmDialog from 'primevue/confirmdialog'
 import ContextMenu from 'primevue/contextmenu'
 import InputText from 'primevue/inputtext'
+import RadioButton from 'primevue/radiobutton'
+import Dropdown from 'primevue/dropdown'
 import { computed, ref } from 'vue'
 
 const {
@@ -237,7 +257,14 @@ const {
   entryFolder,
   folderContext,
   goBackParentFolder,
+  sortOrder,
+  sortBy,
 } = useExplorer()
+
+const sortOptions = [
+  { label: 'Name', value: 'name' },
+  { label: 'Creation Date', value: 'createdAt' },
+]
 
 const searchContent = ref('')
 

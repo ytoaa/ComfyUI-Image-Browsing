@@ -16,6 +16,8 @@ export const useExplorer = defineStore('explorer', (store) => {
   const { t } = useI18n()
 
   const loading = ref(false)
+  const sortOrder = ref('asc')
+  const sortBy = ref('name')
 
   const rootDirectory: DirectoryBreadcrumb = {
     name: 'output',
@@ -37,6 +39,21 @@ export const useExplorer = defineStore('explorer', (store) => {
   const contextItems = ref<MenuItem[]>([])
   const selectedItems = ref<DirectoryItem[]>([])
   const currentSelected = ref<DirectoryItem>()
+
+  const sortItems = (items: DirectoryItem[]) => {
+    const sorted = [...items].sort((a, b) => {
+      if (sortBy.value === 'name') {
+        return sortOrder.value === 'asc' 
+          ? a.name.localeCompare(b.name) 
+          : b.name.localeCompare(a.name)
+      } else {
+        return sortOrder.value === 'asc'
+          ? a.createdAt - b.createdAt
+          : b.createdAt - a.createdAt
+      }
+    })
+    return sorted
+  }
 
   const entryFolder = async (item: DirectoryItem, breadcrumbIndex: number) => {
     if (breadcrumbIndex === breadcrumb.value.length - 1) {
@@ -439,12 +456,15 @@ export const useExplorer = defineStore('explorer', (store) => {
             images.push(item)
           }
         }
-        // 이름 정렬 대신 생성일 내림차순 정렬
-        folders.sort((a, b) => b.createdAt - a.createdAt);
-        images.sort((a, b) => b.createdAt - a.createdAt);
-        items.value = [...folders, ...images]
+        
+        // Apply sorting to both folders and images
+        const sortedFolders = sortItems(folders)
+        const sortedImages = sortItems(images)
+        
+        items.value = [...sortedFolders, ...sortedImages]
         items.value.forEach(bindEvents)
-        breadcrumb.value[breadcrumb.value.length - 1].children = folders.map(
+        
+        breadcrumb.value[breadcrumb.value.length - 1].children = sortedFolders.map(
           (item) => {
             const folderLevel = breadcrumb.value.length
             return {
@@ -476,20 +496,22 @@ export const useExplorer = defineStore('explorer', (store) => {
   }
 
   return {
-    loading: loading,
-    items: items,
-    breadcrumb: breadcrumb,
-    menuRef: menuRef,
-    contextItems: contextItems,
-    selectedItems: selectedItems,
-    confirmName: confirmName,
-    refresh: refresh,
-    deleteItems: deleteItems,
-    renameItem: renameItem,
-    entryFolder: entryFolder,
-    folderContext: folderContext,
-    goBackParentFolder: goBackParentFolder,
-    clearStatus: clearStatus,
+    loading,
+    items,
+    breadcrumb,
+    menuRef,
+    contextItems,
+    selectedItems,
+    confirmName,
+    sortOrder,
+    sortBy,
+    refresh,
+    deleteItems,
+    renameItem,
+    entryFolder,
+    folderContext,
+    goBackParentFolder,
+    clearStatus,
   }
 })
 
