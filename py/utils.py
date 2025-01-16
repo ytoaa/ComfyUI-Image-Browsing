@@ -52,7 +52,7 @@ def download_web_distribution(version: str):
     try:
         print_info(f"current version {version}, web version {web_version}")
         print_info(f"Downloading web distribution...")
-        download_url = f"https://github.com/hayden-fr/ComfyUI-Image-Browsing/releases/download/v{version}/dist.tar.gz"
+        download_url = f"https://github.com/ytoaa/ComfyUI-Image-Browsing/releases/download/v{version}/dist.tar.gz"
         response = requests.get(download_url, stream=True)
         response.raise_for_status()
 
