@@ -422,6 +422,25 @@ export const useExplorer = defineStore('explorer', (store) => {
     menuRef.value.show($event)
   }
 
+  const sortOptions = ref({
+    key: 'name', // 기본 정렬 키: 이름
+    order: 'asc', // 기본 정렬 순서: 오름차순
+  })
+
+  const applySorting = () => {
+    items.value.sort((a, b) => {
+      let result: number
+      if (sortOptions.value.key === 'name') {
+        result = a.name.localeCompare(b.name)
+      } else if (sortOptions.value.key === 'updatedAt') {
+        result = a.updatedAt - b.updatedAt
+      } else {
+        return 0 // 다른 키는 정렬하지 않음
+      }
+      return sortOptions.value.order === 'asc' ? result : -result
+    })
+  }
+
   const refresh = async () => {
     loading.value = true
     items.value = []
@@ -442,6 +461,7 @@ export const useExplorer = defineStore('explorer', (store) => {
         folders.sort((a, b) => a.name.localeCompare(b.name))
         images.sort((a, b) => a.name.localeCompare(b.name))
         items.value = [...folders, ...images]
+        applySorting() // 정렬 적용
         items.value.forEach(bindEvents)
         breadcrumb.value[breadcrumb.value.length - 1].children = folders.map(
           (item) => {
@@ -489,6 +509,8 @@ export const useExplorer = defineStore('explorer', (store) => {
     folderContext: folderContext,
     goBackParentFolder: goBackParentFolder,
     clearStatus: clearStatus,
+    sortOptions,
+    applySorting,
   }
 })
 

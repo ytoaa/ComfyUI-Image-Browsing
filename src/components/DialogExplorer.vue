@@ -208,6 +208,14 @@
       </template>
     </ConfirmDialog>
   </div>
+
+  <div class="flex gap-2">
+    <Button @click="changeSort('name', 'asc')">이름(오름차순)</Button>
+    <Button @click="changeSort('name', 'desc')">이름(내림차순)</Button>
+    <Button @click="changeSort('updatedAt', 'asc')">수정일(오름차순)</Button>
+    <Button @click="changeSort('updatedAt', 'desc')">수정일(내림차순)</Button>
+  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -238,6 +246,8 @@ const {
   entryFolder,
   folderContext,
   goBackParentFolder,
+  sortOptions,
+  applySorting,
 } = useExplorer()
 
 const searchContent = ref('')
@@ -277,4 +287,11 @@ const clearSelected = () => {
 const vFocus = {
   mounted: (el: HTMLInputElement) => el.focus(),
 }
+
+const changeSort = (key: string, order: string) => {
+  sortOptions.value.key = key;
+  sortOptions.value.order = order;
+  applySorting();
+}
+
 </script>
