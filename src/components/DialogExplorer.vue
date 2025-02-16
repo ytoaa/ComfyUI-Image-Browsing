@@ -179,11 +179,11 @@
 
     <div class="flex select-none justify-between px-4 py-2 text-sm">
       <div class="flex gap-4">
-        <span>{{ items.flat().length }} {{ $t('items') }}</span>
+        <span>{{ items.flat().length }} {{ $t("items") }}</span>
         <span v-show="selectedItems.length > 0">
-          {{ $t('selected') }}
+          {{ $t("selected") }}
           {{ selectedItems.length }}
-          {{ $t('items') }}
+          {{ $t("items") }}
         </span>
       </div>
     </div>
@@ -215,24 +215,23 @@
     <Button @click="changeSort('updatedAt', 'asc')">수정일(오름차순)</Button>
     <Button @click="changeSort('updatedAt', 'desc')">수정일(내림차순)</Button>
   </div>
-
 </template>
 
 <script setup lang="ts">
-import ResponseInput from 'components/ResponseInput.vue'
-import ResponseScroll from 'components/ResponseScroll.vue'
-import ResponseSelect from 'components/ResponseSelect.vue'
-import { useContainerQueries } from 'hooks/container'
-import { useExplorer } from 'hooks/explorer'
-import { useContainerResize } from 'hooks/resize'
-import { chunk } from 'lodash'
-import Button from 'primevue/button'
-import ConfirmDialog from 'primevue/confirmdialog'
-import ContextMenu from 'primevue/contextmenu'
-import InputText from 'primevue/inputtext'
-import { computed, ref } from 'vue'
+import ResponseInput from "components/ResponseInput.vue";
+import ResponseScroll from "components/ResponseScroll.vue";
+import ResponseSelect from "components/ResponseSelect.vue";
+import { useContainerQueries } from "hooks/container";
+import { useExplorer } from "hooks/explorer";
+import { useContainerResize } from "hooks/resize";
+import { chunk } from "lodash";
+import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
+import ContextMenu from "primevue/contextmenu";
+import InputText from "primevue/inputtext";
+import { computed, ref } from "vue";
 
-const container = ref<HTMLElement | null>(null)
+const container = ref<HTMLElement | null>(null);
 
 const {
   loading,
@@ -248,50 +247,49 @@ const {
   goBackParentFolder,
   sortOptions,
   applySorting,
-} = useExplorer()
+} = useExplorer();
 
-const searchContent = ref('')
+const searchContent = ref("");
 
-const { width } = useContainerResize(container)
-const { $xl } = useContainerQueries(container)
+const { width } = useContainerResize(container);
+const { $xl } = useContainerQueries(container);
 
 const cols = computed(() => {
-  const containerWidth = width.value
-  const itemWidth = 128
-  return Math.floor(containerWidth / itemWidth)
-})
+  const containerWidth = width.value;
+  const itemWidth = 128;
+  return Math.floor(containerWidth / itemWidth);
+});
 
 const folderItems = computed(() => {
   const filterItems = items.value.filter((item) => {
-    return item.name.toLowerCase().includes(searchContent.value.toLowerCase())
-  })
-  return chunk(filterItems, cols.value)
-})
+    return item.name.toLowerCase().includes(searchContent.value.toLowerCase());
+  });
+  return chunk(filterItems, cols.value);
+});
 
 const currentFolderName = computed(() => {
-  return breadcrumb.value[breadcrumb.value.length - 1].name
-})
+  return breadcrumb.value[breadcrumb.value.length - 1].name;
+});
 
 const selectedItemsName = computed(() => {
-  return selectedItems.value.map((item) => item.name)
-})
+  return selectedItems.value.map((item) => item.name);
+});
 
 const nonContextMenu = ($event: MouseEvent) => {
-  menu.value.hide($event)
-}
+  menu.value.hide($event);
+};
 
 const clearSelected = () => {
-  selectedItems.value = []
-}
+  selectedItems.value = [];
+};
 
 const vFocus = {
   mounted: (el: HTMLInputElement) => el.focus(),
-}
+};
 
 const changeSort = (key: string, order: string) => {
   sortOptions.value.key = key;
   sortOptions.value.order = order;
   applySorting();
-}
-
+};
 </script>
